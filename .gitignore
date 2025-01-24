@@ -9,6 +9,7 @@ lerna-debug.log*
 
 # Ignore environment folder
 environment/
+environment/.env
 .env
 node_modules
 dist
