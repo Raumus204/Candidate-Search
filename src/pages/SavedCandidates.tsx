@@ -3,7 +3,9 @@ import type Candidate from "../interfaces/Candidate.interface";
 
 const SavedCandidates = () => {
   const [savedCandidates, setSavedCandidates] = useState<Candidate[]>([]);
+  const [filterQuery, setFilterQuery] = useState<string>("");
 
+  // Load candidates from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem("savedCandidates");
     if (saved) {
@@ -11,6 +13,7 @@ const SavedCandidates = () => {
     }
   }, []);
 
+  // Function to handle candidate rejection
   const handleReject = (id: number) => {
     const updatedCandidates = savedCandidates.filter(
       (candidate) => candidate.id !== id
@@ -19,9 +22,32 @@ const SavedCandidates = () => {
     localStorage.setItem("savedCandidates", JSON.stringify(updatedCandidates));
   };
 
+  // Filter candidates
+  const filteredCandidates = savedCandidates.filter((candidate) =>
+    filterQuery
+      ? candidate.name?.toLowerCase().includes(filterQuery.toLowerCase()) ||
+        candidate.login?.toLowerCase().includes(filterQuery.toLowerCase()) ||
+        candidate.location?.toLowerCase().includes(filterQuery.toLowerCase()) ||
+        candidate.company?.toLowerCase().includes(filterQuery.toLowerCase())
+      : true
+  );
+
   return (
     <main>
       <h1>Potential Candidates</h1>
+
+      {/* Filter Input */}
+      <div>
+        <label>Filter Candidates: </label>
+        <input
+          type="text"
+          placeholder="Search by name, username, location, or company"
+          value={filterQuery}
+          onChange={(e) => setFilterQuery(e.target.value)}
+        />
+      </div>
+
+      {/* Candidates Table */}
       <table className="table">
         <thead>
           <tr>
@@ -30,13 +56,12 @@ const SavedCandidates = () => {
             <th>Location</th>
             <th>Email</th>
             <th>Company</th>
-            <th>Bio</th>
             <th>Reject</th>
           </tr>
         </thead>
         <tbody>
-          {savedCandidates.length > 0 ? (
-            savedCandidates.map((candidate) => (
+          {filteredCandidates.length > 0 ? (
+            filteredCandidates.map((candidate) => (
               <tr key={candidate.id}>
                 <td>
                   <img
@@ -62,7 +87,6 @@ const SavedCandidates = () => {
                   )}
                 </td>
                 <td>{candidate.company || "N/A"}</td>
-                <td>{candidate.bio || "N/A"}</td>
                 <td>
                   <button
                     className="btn btn-danger"
@@ -75,7 +99,7 @@ const SavedCandidates = () => {
             ))
           ) : (
             <tr>
-              <td colSpan={7}>No candidates have been saved yet.</td>
+              <td colSpan={6}>No candidates match the current criteria.</td>
             </tr>
           )}
         </tbody>
@@ -85,3 +109,4 @@ const SavedCandidates = () => {
 };
 
 export default SavedCandidates;
+

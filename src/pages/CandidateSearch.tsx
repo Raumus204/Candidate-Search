@@ -1,107 +1,107 @@
-import { useState, useEffect } from "react";
+import { type FormEvent, useState, useEffect } from "react";
 import { searchGithub, searchGithubUser } from "../api/API";
 import type Candidate from "../interfaces/Candidate.interface";
+import CandidateCard from "../components/CandidateCard";
 
 const CandidateSearch = () => {
-  const [candidates, setCandidates] = useState<Candidate[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [savedCandidates, setSavedCandidates] = useState<Candidate[]>(() => {
-    const saved = localStorage.getItem("savedCandidates");
-    return saved ? JSON.parse(saved) : [];
+  const [currentCandidate, setCurrentCandidate] = useState<Candidate>({
+    id: 0,
+    login: "",
+    avatar_url: "",
+    name: "",
+    location: "",
+    email: "",
+    company: "",
+    bio: "",
   });
+  const [searchInput, setSearchInput] = useState<string>('');
 
+  // Fetch random candidates when the page loads using your custom searchGithub
   useEffect(() => {
-    const fetchCandidates = async () => {
-      const data = await searchGithub();
-      const formattedData = data.map((candidate: any) => ({
-        id: candidate.id || "",
-        login: candidate.login || "",
-        avatar_url: candidate.avatar_url || "",
-        name: candidate.name || "",
-        location: candidate.location || "",
-        email: candidate.email || "",
-        company: candidate.company || "",
-        bio: candidate.bio || "",
-      }));
-      setCandidates(formattedData);
+    const fetchRandomCandidate = async () => {
+      const data = await searchGithub(); // Custom random user fetch
+      if (data.length > 0) {
+        const randomUser = data[0];
+        const detailedUser = await searchGithubUser(randomUser.login || "");
+        setCurrentCandidate(detailedUser); // Set the candidate
+      }
     };
-    fetchCandidates();
+    fetchRandomCandidate();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("savedCandidates", JSON.stringify(savedCandidates));
-  }, [savedCandidates]);
-
-  const currentCandidate = candidates[currentIndex];
-
-  const handleSaveCandidate = () => {
-    if (currentCandidate) {
-      setSavedCandidates((prev) => [...prev, currentCandidate]);
-      handleNextCandidate();
+  const saveCandidate = () => {
+    let parsedCandidate: Candidate[] = [];
+    const storedCandidates = localStorage.getItem('savedCandidates');
+    if (typeof storedCandidates === 'string') {
+      parsedCandidate = JSON.parse(storedCandidates);
     }
+    parsedCandidate.push(currentCandidate);
+    localStorage.setItem('savedCandidates', JSON.stringify(parsedCandidate));
   };
 
-  const handleNextCandidate = () => {
-    if (currentIndex < candidates.length - 1) {
-      setCurrentIndex((prevIndex) => prevIndex + 1);
-    } else {
-      setCandidates([]);
+  const searchCandidate = async (event: FormEvent, search: string) => {
+    event.preventDefault();
+    try {
+      const data: Candidate = await searchGithubUser(search);
+      console.log('Searched Candidate Data:', data); // Log the search result to inspect it since 90% of the time it shows N/A
+
+      // Ensure that the returned candidate data has all necessary fields
+      setCurrentCandidate(data); 
+    } catch (error) {
+      console.log('Error searching for candidate:', error);
     }
+    setSearchInput(""); // Clear search input after search
   };
 
-  console.log(currentCandidate);
+  // Fetch random users
+  const nextCandidate = async () => {
+    try {
+      const randomUsers = await searchGithub(); 
+      for (const user of randomUsers) {
+        try {
+          const detailedUser = await searchGithubUser(user.login || ""); 
+          if (detailedUser && detailedUser.login) {
+            setCurrentCandidate(detailedUser);
+            return; 
+          }
+        } catch (error) {
+          if (error instanceof Error) {
+            console.log(`Skipping user ${user.login} due to error: ${error.message}`); // not working
+          } else {
+            console.log(`Skipping user ${user.login} due to an unknown error`); // not working
+          }
+          continue;
+        }
+      }
+      console.log("No valid users found in this batch.");
+    } catch (error) {
+      console.error("Error fetching random users:", error);
+    }
+  };
+  
+
   return (
-    <main>
-      <div>
-        <h1>Candidate Search</h1>
+    <>
+      <section id="searchSection">
+        <form onSubmit={(event: FormEvent) => searchCandidate(event, searchInput)}>
+          <input
+            type="text"
+            placeholder="Search for a candidate"
+            onChange={(event) => setSearchInput(event.target.value)}
+            value={searchInput}
+          />
+          <button type="submit">Search</button>
+        </form>
+      </section>
 
-        {currentCandidate ? (
-          <section className="candidate-card">
-            <figure>
-              <img
-                src={currentCandidate.avatar_url || ""}
-                alt={currentCandidate.login || "No Avatar"}
-                className="candidateAvatar"
-              />
-            </figure>
-            <article>
-              <h2>
-                {currentCandidate.name} ({currentCandidate.login})
-              </h2>
-              <p>Location: {currentCandidate.location}</p>
-              <p>
-                Email:{" "}
-                {currentCandidate.email ? (
-                  <a href={`mailto:${currentCandidate.email}`}>
-                    {currentCandidate.email}
-                  </a>
-                ) : (
-                  "N/A"
-                )}
-              </p>
-              <p>Company: {currentCandidate.company || "N/A"}</p>
-              <p>Bio: {currentCandidate.bio || "N/A"}</p>
-            </article>
-            <div>
-              <button
-                className="nextCandidate"
-                onClick={handleNextCandidate}
-              >
-                -
-              </button>
-              <button
-                className="savedCandidate"
-                onClick={handleSaveCandidate}
-              >
-                +
-              </button>
-            </div>
-          </section>
-        ) : (
-          <p>No more candidates available.</p>
-        )}
-      </div>
-    </main>
+      {/* CandidateCard will re-render when currentCandidate changes */}
+      <CandidateCard
+        currentCandidate={currentCandidate}
+        handleSaveCandidate={saveCandidate}
+        handleNextCandidate={nextCandidate}
+      />
+      
+    </>
   );
 };
 
