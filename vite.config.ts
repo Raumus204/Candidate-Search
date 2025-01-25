@@ -9,6 +9,6 @@ export default defineConfig({
   envDir: './environment',
   plugins: [react()],
   server: {
-    port: Number(process.env.VITE_PORT) || 3001,  // This will use the VITE_PORT from .env or fall back to 3001
+    port: Number(process.env.VITE_PORT) || 3001, 
   },
 });
