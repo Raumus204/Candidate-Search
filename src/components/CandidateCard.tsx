@@ -15,7 +15,7 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
   }) => {
     return (
       <main>
-        <div>
+        <div className="candidateSearch">
           <h1>Candidate Search</h1>
   
           {currentCandidate ? (
@@ -45,14 +45,14 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
                 <p>Company: {currentCandidate.company || "N/A"}</p>
                 <p>Bio: {currentCandidate.bio || "N/A"}</p>
               </article>
-              <div className="candidateControls">
+              <section className="candidateControls">
                 <button className="nextCandidate" onClick={handleNextCandidate}>
                   -
                 </button>
                 <button className="savedCandidate" onClick={handleSaveCandidate}>
                   +
                 </button>
-              </div>
+              </section>
             </section>
           ) : (
             <p>No more candidates available.</p>

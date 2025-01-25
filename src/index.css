@@ -18,7 +18,7 @@ a {
   font-weight: 500;
   color: #646cff;
   text-decoration: inherit;
-  text-wrap: wrap;
+  word-wrap: break-word;
 }
 a:hover {
   color: #535bf2;
@@ -124,6 +124,15 @@ tbody tr:nth-child(odd) {
   padding: 0;
 }
 
+.figure {
+  display: flex; 
+  flex-direction: column; 
+  justify-content: center; 
+  margin: 0 auto; 
+  text-align: center; 
+  
+}
+
 .active {
   font-weight: 700;
   color: #7bebfa;
@@ -143,10 +152,50 @@ tbody tr:nth-child(odd) {
 
 .candidateAvatar {
   border-radius: 20%;
+  display: block; 
+  margin: 0 auto; 
+  max-width: 100%; 
+  height: auto; 
+  width: 300px;
+  
 }
 
 .candidateInfo {
+  border-radius: 10%;
   background-color: black;
   text-align:center;
+  text-wrap: wrap;
+  width: 400px;
+  max-width: 100%;
+}
+.cadidateInfo a {
+  word-wrap: break-word;
 }
 
+.candidateControls {
+  display: flex;
+  justify-content: space-between;
+}
+
+.nextCandidate {
+  background-color: rgb(170, 23, 23);
+}
+
+.savedCandidate {
+  background-color: rgb(24, 97, 24);
+}
+
+.candidateSearch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.searchInput {
+  margin: 1rem;
+}
+
+.button-red {
+  background-color: rgb(170, 23, 23);
+}

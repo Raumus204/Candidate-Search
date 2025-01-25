@@ -89,7 +89,7 @@ const SavedCandidates = () => {
                 <td>{candidate.company || "N/A"}</td>
                 <td>
                   <button
-                    className="btn btn-danger"
+                    className="button-red"
                     onClick={() => candidate.id !== null && handleReject(candidate.id)}
                   >
                     &#8722;
